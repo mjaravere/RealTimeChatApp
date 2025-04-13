@@ -9,15 +9,12 @@ const io = new Server(httpServer, { cors: { origin: "http://localhost:3000" } })
 interface UserData {
   user: string;
   text: string;
+  timestamp: string;
 }
 
 const messages: UserData[] = [];
 
 io.on("connection", (socket: Socket) => {
-  console.log("Kasutaja ühendatud:", socket.id);
-
-  socket.emit("messageHistory", messages);
-
   let username = "Anonymous";
 
   socket.on("setUsername", (user: string) => {
@@ -28,11 +25,12 @@ io.on("connection", (socket: Socket) => {
     if (!username) {
       username = "Anonymous";
     }
-    console.log(`Kasutaja ${socket.id} nimi: ${username}`);
+    console.log(`Kasutaja ühendatud: ${socket.id}, nimi: ${username}`);
+    socket.emit("messageHistory", messages);
   });
 
   socket.on("message", (data: UserData) => {
-    const message = { user: username, text: data.text };
+    const message = { user: username, text: data.text, timestamp: new Date().toISOString() };
     console.log("Sõnum saadetud:", message);
     messages.push(message);
     io.emit("message", message);
