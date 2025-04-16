@@ -27,7 +27,7 @@ function App() {
         setUsername(savedUsername);
         setSessionId(savedSessionId);
         setIsUsernameSet(true);
-        const newSocket = io("http://localhost:5000");
+        const newSocket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
         setSocket(newSocket);
         newSocket.emit("joinSession", { sessionId: savedSessionId, username: savedUsername });
     }
@@ -80,7 +80,7 @@ function App() {
       sessionStorage.setItem("sessionId", enteredSessionId);
     }
 
-    const newSocket = io("http://localhost:5000");
+    const newSocket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
     setSocket(newSocket);
 
     const sessionData = {
