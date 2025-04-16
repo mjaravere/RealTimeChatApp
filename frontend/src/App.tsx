@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 import { format } from "date-fns/format";
 import { parseISO } from "date-fns/parseISO";
+import styles from "./App.module.css";
 
 interface Message {
   user: string;
@@ -19,6 +20,8 @@ function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionIdInput, setSessionIdInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const messageAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedUsername = sessionStorage.getItem("username");
@@ -40,11 +43,13 @@ function App() {
 
     socket.on("connect", () => {
       console.log("Connected to backend!");
+      setIsLoading(false);
     });
 
     socket.on("connect_error", (error) => {
       console.error("Connection error:", error.message);
       setError("Failed to connect to the backend. Please try again.");
+      setIsLoading(false);
     });
 
     socket.on("sessionCreated", (newSessionId: string) => {
@@ -79,6 +84,12 @@ function App() {
     };
   }, [isUsernameSet, socket]);
 
+  useEffect(() => {
+    if (messageAreaRef.current) {
+      messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   const handleJoinSession = () => {
     const user = usernameInput.trim() || "Anonymous";
     const enteredSessionId = sessionIdInput.trim() || null;
@@ -92,6 +103,7 @@ function App() {
       sessionStorage.setItem("sessionId", enteredSessionId);
     }
 
+    setIsLoading(true);
     const newSocket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000", {
       transports: ["websocket"],
     });
@@ -123,86 +135,90 @@ function App() {
     }
   };
 
+
   if (!isUsernameSet) {
     return (
-        <div style={{ padding: "20px" }}>
-            <h1>Welcome to Real-Time Chat</h1>
-            <div style={{ marginTop: "20px" }}>
-                <label>
+        <div className={styles.container}>
+          <div className={`${styles.card} ${styles.cardNarrow}`}>
+            <h1 className={styles.title}>Welcome to Real-Time Chat</h1>
+            <div style={{ marginBottom: "24px" }}>
+                <label className={styles.label}>
                     Enter your username:
                     <input
                         type="text"
                         value={usernameInput}
                         onChange={(e) => setUsernameInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleJoinSession()}
-                        style={{ marginLeft: "10px", padding: "5px" }}
+                        className={styles.input}
                         placeholder="Your username..."
                     />
                 </label>
             </div>
-            <div style={{ marginTop: "10px" }}>
-                <label>
+            <div style={{ marginBottom: "24px" }}>
+                <label className={styles.label}>
                     Enter session ID (or leave blank to create a new session):
                     <input
                         type="text"
                         value={sessionIdInput}
                         onChange={(e) => setSessionIdInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleJoinSession()}
-                        style={{ marginLeft: "10px", padding: "5px" }}
+                        className={styles.input}
                         placeholder="Session ID..."
                     />
                 </label>
             </div>
-            <button
-                onClick={handleJoinSession}
-                style={{ marginTop: "10px", marginLeft: "10px", padding: "5px 10px" }}
-            >
-                Join Chat
+            <button onClick={handleJoinSession} className={styles.button} disabled={isLoading}>
+              {isLoading ? "Joining..." : "Join Chat"}
             </button>
-            {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
+            {error && <p className={styles.error}>{error}</p>}
+            {isLoading && <p className={styles.loading}>Connecting to the backend...</p>}
+            </div>
         </div>
     );
   }
 
   return (
-      <div style={{ padding: "20px" }}>
-          <h1>Real-Time Chat</h1>
-          <p><strong>Username:</strong> {username}</p>
-          <p><strong>Session ID:</strong> {sessionId} (Share this with friends to join!)
-          <button
-              onClick={() => navigator.clipboard.writeText(sessionId || "")}
-              style={{ marginLeft: "10px", padding: "5px 10px" }}
-          >
-              Copy Session ID
-          </button>
-          </p>
-          <div style={{ border: "1px solid #ccc", padding: "10px", height: "300px", overflowY: "scroll" }}>
+      <div className={styles.container}>
+        <div className={`${styles.card} ${styles.cardWide}`}>
+          <h1 className={styles.title}>Real-Time Chat</h1>
+          <p className={styles.info}><strong>Username:</strong> {username}</p>
+          <div className={styles.sessionId}>
+            <strong>Session ID:</strong> {sessionId}
+            <span>(Share this with friends to join!)</span>
+            <button
+                onClick={() => navigator.clipboard.writeText(sessionId || "")}
+                className={styles.copyButton}
+            >
+                Copy Session ID
+            </button>
+          </div>
+          <div className={styles.messageArea} ref={messageAreaRef}>
               {messages.map((msg, i) => (
-                  <p key={i}>
-                      <span style={{ color: "gray", marginRight: "10px" }}>
+                  <p key={i} className={msg.user === username ? styles.messageCurrentUser : styles.messageOtherUser}>
+                      <span className={styles.timestamp}>
                           [{format(parseISO(msg.timestamp), "HH:mm:ss")}]
                       </span>
-                      <strong>{msg.user}:</strong> {msg.text}
+                      <span className={styles.username}>{msg.user}:</span> {msg.text}
                   </p>
               ))}
           </div>
-          <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              style={{ marginTop: "10px", width: "300px" }}
-              placeholder="Type your message..."
-          />
-          <button onClick={sendMessage} style={{ marginLeft: "10px" }}>
-              Send
-          </button>
-          <button
-              onClick={handleLeaveSession}
-              style={{ marginLeft: "10px", marginTop: "10px", padding: "5px 10px" }}
-          >
+          <div className={styles.inputWrapper}>
+            <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                className={styles.messageInput}
+                placeholder="Type your message..."
+            />
+            <button onClick={sendMessage} className={styles.sendButton}>
+                Send
+            </button>
+          </div>
+          <button onClick={handleLeaveSession} className={styles.leaveButton}>
               Leave Session
           </button>
+          </div>
       </div>
   );
 }
