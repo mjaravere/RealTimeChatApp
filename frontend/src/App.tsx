@@ -27,7 +27,9 @@ function App() {
         setUsername(savedUsername);
         setSessionId(savedSessionId);
         setIsUsernameSet(true);
-        const newSocket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
+        const newSocket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000", {
+          transports: ["websocket"],
+        });
         setSocket(newSocket);
         newSocket.emit("joinSession", { sessionId: savedSessionId, username: savedUsername });
     }
@@ -36,7 +38,17 @@ function App() {
   useEffect(() => {
     if (!isUsernameSet || !socket) return;
 
+    socket.on("connect", () => {
+      console.log("Connected to backend!");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Connection error:", error.message);
+      setError("Failed to connect to the backend. Please try again.");
+    });
+
     socket.on("sessionCreated", (newSessionId: string) => {
+      console.log("Session created:", newSessionId);
       setSessionId(newSessionId);
       sessionStorage.setItem("sessionId", newSessionId);
   });
@@ -80,7 +92,9 @@ function App() {
       sessionStorage.setItem("sessionId", enteredSessionId);
     }
 
-    const newSocket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
+    const newSocket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000", {
+      transports: ["websocket"],
+    });
     setSocket(newSocket);
 
     const sessionData = {
