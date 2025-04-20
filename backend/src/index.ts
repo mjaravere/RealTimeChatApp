@@ -83,7 +83,7 @@ io.on("connection", (socket: Socket) => {
     user = new User(username);
     session.users.set(username, user);
     session.connectedClients++;
-    console.log(`Kasutaja ${username} ühendatud sessiooniga ${sessionId}, aktiivseid kliente: ${session.connectedClients}`);
+    console.log(`User ${username} joined session ${sessionId}, active clients: ${session.connectedClients}`);
 
     socket.join(sessionId);
 
@@ -98,7 +98,7 @@ io.on("connection", (socket: Socket) => {
     if (!user || !session || !sessionId) return;
 
     const message = new Message(user.username, data.text);
-    console.log(`Sõnum saadetud sessioonis ${sessionId}:`, message);
+    console.log(`Message sent in session ${sessionId}:`, message);
 
     session.messages.push(message);
 
@@ -113,12 +113,12 @@ socket.on("disconnect", () => {
   if (!user || !session || !sessionId) return;
 
   session.connectedClients--;
-  console.log(`Kasutaja ${user.username} lahkunud sessioonist ${sessionId}, aktiivseid kliente: ${session.connectedClients}`);
+  console.log(`User ${user.username} left session ${sessionId}, active clients: ${session.connectedClients}`);
 
   session.users.delete(user.username);
 
   if (session.connectedClients === 0) {
-    console.log(`Sessioon ${sessionId} lõppes, kustutatud.`);
+    console.log(`Session ${sessionId} ended, deleted.`);
     sessions.delete(sessionId);
   }
 
@@ -126,5 +126,5 @@ socket.on("disconnect", () => {
 });
 });
 httpServer.listen(5000, () => {
-  console.log("Server töötab pordil 5000");
+  console.log("Server running on port 5000");
 });

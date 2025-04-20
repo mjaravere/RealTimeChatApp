@@ -178,48 +178,61 @@ function App() {
   }
 
   return (
-      <div className={styles.container}>
-        <div className={`${styles.card} ${styles.cardWide}`}>
+    <div className={styles.container}>
+      <div className={`${styles.card} ${styles.cardWide}`}>
+        <div className={styles.header}>
           <h1 className={styles.title}>Real-Time Chat</h1>
-          <p className={styles.info}><strong>Username:</strong> {username}</p>
-          <div className={styles.sessionId}>
-            <strong>Session ID:</strong> {sessionId}
-            <span>(Share this with friends to join!)</span>
-            <button
-                onClick={() => navigator.clipboard.writeText(sessionId || "")}
-                className={styles.copyButton}
-            >
-                Copy Session ID
-            </button>
-          </div>
-          <div className={styles.messageArea} ref={messageAreaRef}>
-              {messages.map((msg, i) => (
-                  <p key={i} className={msg.user === username ? styles.messageCurrentUser : styles.messageOtherUser}>
-                      <span className={styles.timestamp}>
-                          [{format(parseISO(msg.timestamp), "HH:mm:ss")}]
-                      </span>
-                      <span className={styles.username}>{msg.user}:</span> {msg.text}
-                  </p>
-              ))}
-          </div>
-          <div className={styles.inputWrapper}>
-            <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                className={styles.messageInput}
-                placeholder="Type your message..."
-            />
-            <button onClick={sendMessage} className={styles.sendButton}>
-                Send
-            </button>
-          </div>
-          <button onClick={handleLeaveSession} className={styles.leaveButton}>
-              Leave Session
+          <button onClick={handleLeaveSession} className={styles.leaveButton} title="Leave Session">
+            <svg className={styles.leaveIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="inherit" strokeWidth="inherit" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
-          </div>
+        </div>
+        <p className={styles.info}>
+          <strong>Username:</strong> {username}
+        </p>
+        <div className={styles.sessionId}>
+          <p className={styles.info}><strong>Session ID:</strong> {sessionId}
+          <span>(Share this with friends to join!)</span>
+          <button
+            onClick={() => navigator.clipboard.writeText(sessionId || "")}
+            className={styles.copyButton}
+          >
+            Copy
+          </button></p>
+        </div>
+        <div className={styles.messageArea} ref={messageAreaRef}>
+          {messages.map((msg, i) => (
+            <p
+              key={i}
+              className={
+                msg.user === username
+                  ? styles.messageCurrentUser
+                  : styles.messageOtherUser
+              }
+            >
+              <span className={styles.timestamp}>
+                [{format(parseISO(msg.timestamp), "HH:mm:ss")}]
+              </span>
+              <span className={styles.username}>{msg.user}:</span> {msg.text}
+            </p>
+          ))}
+        </div>
+        <div className={styles.inputWrapper}>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            className={styles.messageInput}
+            placeholder="Type your message..."
+          />
+          <button onClick={sendMessage} className={styles.sendButton}>
+            Send
+          </button>
+        </div>
       </div>
+    </div>
   );
 }
 
