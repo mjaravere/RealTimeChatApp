@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Real-Time Chat Application is a web-based chat platform that allows users to join or create chat sessions and communicate in real-time. It uses React and TypeScript for the frontend, and Node.js and TypeScript with Socket.IO for the backend. The application supports multiple users in a session, displaying messages with timestamps and usernames, and provides a clean, responsive user interface.
+The Real-Time Chat Application is a web-based chat platform that allows users to join or create chat sessions and communicate in real-time. It uses React and TypeScript for the frontend, and Node.js and TypeScript with Socket.IO for the backend. The application supports multiple users in a session, displaying messages with usernames, and provides a clean, responsive user interface.
 
 
 ## Setup Instructions
@@ -66,6 +66,38 @@ cd RealTimeChatApp
 - Open `http://localhost:3000` in your browser.
 - You should see the join screen with username and session ID input fields.
 - Enter a username and optionally a session ID, then click "Join Chat" to start chatting.
+
+## Deployment
+
+### Frontend (Vercel)
+
+**Deploy on Vercel**:
+- Log in to vercel.com.
+- Create a new project and import your repository.
+- Configure the project:
+   - Framework: React.
+   - Root Directory: `frontend/`.
+   - Environment Variables: Add `REACT_APP_BACKEND_URL` with your Render backend URL (e.g., `https://your-backend-url.onrender.com`).
+- Deploy the project. Vercel will provide a URL (e.g., `https://your-app.vercel.app`).
+- If the project was suspended, resume it in the Vercel dashboard.
+
+### Backend (Render)
+
+**Deploy on Render**:
+- Log in to render.com.
+- Create a new Node.js service and import your repository.
+- Configure the service:
+   - Root Directory: `backend/`.
+   - Build Command: `npm install && npm run build`.
+   - Start Command: `npm start`.
+- Deploy the service. Render will provide a URL (e.g., `https://your-backend.onrender.com`).
+- If the service was suspended, resume it in the Render dashboard.
+
+### Post-Deployment
+
+- Update the frontend’s `REACT_APP_BACKEND_URL` in Vercel to point to the Render URL.
+- Redeploy the frontend on Vercel if necessary.
+- Test the deployed app by accessing the Vercel URL and joining a chat session.
 
 
 ## Usage Guide
